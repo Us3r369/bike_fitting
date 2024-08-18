@@ -8,16 +8,6 @@ import pandas as pd
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, message="SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead.")
 
-video_name = 'seatpost_4_1'
-video_path = f'./{video_name}.mov'
-output_folder = f'processed_files_{video_name}'
-output_video_path = f'./{output_folder}/{video_name}_annotated.mp4'
-frame_rate = 30  # Adjust based on your video's frame rate
-
-# Initialize MediaPipe Pose
-mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(static_image_mode=False, model_complexity=2, enable_segmentation=True, min_detection_confidence=0.8)
-
 def extract_keypoints(landmarks):
     keypoints = {}
     keypoints['left_shoulder'] = [landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x,
@@ -228,17 +218,4 @@ def create_angle_overview(angles):
 
     # Convert the result to dataframe
     angle_stats_df = pd.DataFrame(angle_stats)
-    angle_stats_df.transpose().to_csv(f'{output_folder}/angle_stats.csv')
     return angle_stats_df.transpose()
-    
-
-if __name__ == '__main__':
-    angles = process_video_and_save_keypoints_and_angles(video_path, output_folder)
-    angle_stats = create_angle_overview(angles)
-    #save angles as json
-    with open(f'{output_folder}/angles_all.json', 'w') as f:
-        json.dump(angles, f)
-    frames_to_video(output_folder, output_video_path, frame_rate)
-
-    print(f"Video saved as {output_video_path}\n")
-    print(f"Here are the angle stats:\n{angle_stats.head(10)}")

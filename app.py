@@ -19,14 +19,26 @@ st.title("Bike Fitting Application")
 uploaded_file = st.file_uploader("Upload your cycling video", type=["mp4", "mov", "avi"])
 
 # Step 2: Target Range Inputs
+# Load the JSON file
+with open(f'{input_folder}target_ranges.json', 'r') as f:
+    target_ranges = json.load(f)
+
+# Create sliders dynamically based on the JSON data
 st.sidebar.header("Define Target Ranges (in degrees)")
-knee_angle_target = st.sidebar.slider("Knee Angle", min_value=0, max_value=180, value=(30, 40))
-elbow_angle_target = st.sidebar.slider("Elbow Angle", min_value=0, max_value=180, value=(10, 20))
-shoulder_angle_target = st.sidebar.slider("Shoulder Angle", min_value=0, max_value=180, value=(30, 50))
-hip_angle_target = st.sidebar.slider("Hip Angle", min_value=0, max_value=180, value=(40, 50))
-ankle_angle_target = st.sidebar.slider("Ankle Angle", min_value=0, max_value=180, value=(5, 15))
-back_gradient_target = st.sidebar.slider("Back Gradient", min_value=-90, max_value=90, value=(10, 30))
-thigh_gradient_target = st.sidebar.slider("Thigh Gradient", min_value=-90, max_value=90, value=(15, 25))
+knee_angle_target = st.sidebar.slider(
+    "Knee Angle", min_value=0, max_value=180, value=(target_ranges['knee_angle'][0], target_ranges['knee_angle'][1]))
+elbow_angle_target = st.sidebar.slider(
+    "Elbow Angle", min_value=0, max_value=180, value=(target_ranges['elbow_angle'][0], target_ranges['elbow_angle'][1]))
+shoulder_angle_target = st.sidebar.slider(
+    "Shoulder Angle", min_value=0, max_value=180, value=(target_ranges['shoulder_angle'][0], target_ranges['shoulder_angle'][1]))
+hip_angle_target = st.sidebar.slider(
+    "Hip Angle", min_value=0, max_value=180, value=(target_ranges['hip_angle'][0], target_ranges['hip_angle'][1]))
+ankle_angle_target = st.sidebar.slider(
+    "Ankle Angle", min_value=0, max_value=180, value=(target_ranges['ankle_angle'][0], target_ranges['ankle_angle'][1]))
+back_gradient_target = st.sidebar.slider(
+    "Back Gradient", min_value=-90, max_value=90, value=(target_ranges['back_gradient'][0], target_ranges['back_gradient'][1]))
+thigh_gradient_target = st.sidebar.slider(
+    "Thigh Gradient", min_value=-90, max_value=90, value=(target_ranges['thigh_gradient'][0], target_ranges['thigh_gradient'][1]))
 #Button to save the target ranges
 if st.sidebar.button("Save Target Ranges"):
     target_ranges = {
@@ -45,36 +57,30 @@ if st.sidebar.button("Save Target Ranges"):
 tab1, tab2 = st.tabs(["Analysis", "Explanation"])
 
 # Step 3: Start Analysis Button
-with tab1:
-    if st.button("Start Analysis"):
-        if uploaded_file is not None:
-            # Save uploaded file to the input folder
-            with open(video_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-        # Initialize MediaPipe Pose
-        mp_pose = mp.solutions.pose
-        pose = mp_pose.Pose(static_image_mode=False, model_complexity=2, enable_segmentation=True, min_detection_confidence=0.8)
-            
-        angles = process_video_and_save_keypoints_and_angles(video_path, output_folder)
-        angle_stats = create_angle_overview(angles)
-        #save angles and overview
-        with open(f'{output_folder}/angles_all.json', 'w') as f:
-            json.dump(angles, f)
-        angle_stats.to_csv(f'{output_folder}/angle_stats.csv', index=False)
-        #Render video
-        frames_to_video(output_folder, output_video_path, frame_rate)
+if st.button("Start Analysis"):
+    if uploaded_file is not None:
+        # Save uploaded file to the input folder
+        with open(video_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+    # Initialize MediaPipe Pose
+    mp_pose = mp.solutions.pose
+    pose = mp_pose.Pose(static_image_mode=False, model_complexity=2, enable_segmentation=True, min_detection_confidence=0.8)
+        
+    angles = process_video_and_save_keypoints_and_angles(video_path, output_folder)
+    angle_stats = create_angle_overview(angles)
+    #save angles and overview
+    with open(f'{output_folder}/angles_all.json', 'w') as f:
+        json.dump(angles, f)
+    angle_stats.to_csv(f'{output_folder}/angle_stats.csv', index=False)
+    #Render video
+    frames_to_video(output_folder, output_video_path, frame_rate)
 
-        st.header("Analysis Results")
-        #Step 4: Display Results
-        video_file = open("./files/output_files/output_video.mov", "rb")
-        video_bytes = video_file.read()
-        st.video(video_bytes)
+    st.header("Analysis Results")
+    #Step 4: Display Results
+    video_file = open("./files/output_files/output_video.mov", "rb")
+    video_bytes = video_file.read()
+    st.video(video_bytes)
 
-        #st.write(analysis_results)  # Assumes this is a DataFrame or dictionary of results
-    else:
-        st.error("Please upload a video file.")
-
-with tab2:
-    st.write("Please see the image below for an explanation of the different angles.")
-    #display picture
-    st.image("./files/in_app_information/measurement_explanation.png", use_column_width=True)
+    #st.write(analysis_results)  # Assumes this is a DataFrame or dictionary of results
+else:
+    st.error("Please upload a video file.")
