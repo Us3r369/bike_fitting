@@ -2,7 +2,10 @@ from bike_fit.bike_fit import Bike_Fit
 from bike_fit.video_processor import VideoProcessor
 import json
 import streamlit as st
+import pandas as pd
 import mediapipe as mp
+import logging
+logging.basicConfig(level=logging.INFO)
 
 input_folder = "./files/input_files/"
 video_name = 'input_video.mp4'
@@ -56,15 +59,25 @@ if st.button("Start Analysis"):
         # Save uploaded file to the input folder
         with open(video_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
-        # Initialize the VideoProcessor with the input video
+
+        # Initialize MediaPipe Pose
+        mp_pose = mp.solutions.pose
+        pose = mp_pose.Pose(static_image_mode=False, model_complexity=2, enable_segmentation=True, min_detection_confidence=0.8)
+    # Initialize the VideoProcessor with the input video
     video_processor = VideoProcessor(video_path, output_video_path)
 
     # Process the video and get the actual angles
-    video_processor.process_video()
+    video_angles = video_processor.process_video()
+    #save video angles to json file
+    with open(f'{output_folder}/video_angles.json', 'w') as f:
+        json.dump(video_angles.actual_angles, f)
 
-
-    # Update the BikeFit object with the actual angles
-    #bike_fit.update_actual_angle(actual_angles)
-
+    st.header("Analysis Results")
+    #Step 4: Display Results
+    video_file = open("./files/output_files/output_video.mov", "rb")
+    video_bytes = video_file.read()
+    st.video(video_bytes)
+    st.write("The actual angles measured during the bike fitting session are:")
+    st.write(video_angles.actual_angles)
     # Compare the target angles with the actual angles
     #comparison_results = bike_fit.compare_angles()
