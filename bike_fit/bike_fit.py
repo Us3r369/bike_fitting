@@ -7,6 +7,7 @@ class Bike_Fit:
         """
         self.target_angles = target_angles if target_angles is not None else {}
         self.actual_angles = {}
+        self.fitting = {}
 
     def set_actual_angles(self, actual_angles):
         """
@@ -32,7 +33,7 @@ class Bike_Fit:
         with open(filepath, 'w') as f:
             json.dump(self.target_angles, f)
 
-    def update_actual_angle(self, angle_name, new_angle):
+    def update_actual_angles(self, angle_name, new_angle):
         """
         Update the actual angle for the given angle_name.
         If new_angle is outside the current min/max range, update it.
@@ -54,19 +55,32 @@ class Bike_Fit:
         :return: A dictionary containing the comparison between target and actual angles.
         """
         comparison = {}
-        for angle in self.target_angles:
-            target_value = self.target_angles[angle]
-            actual_value = self.actual_angles.get(angle, None)
-            if actual_value:
-                comparison[angle] = {
-                    "target": target_value,
-                    "actual": actual_value,
-                    "difference": (actual_value[0] - target_value[0], actual_value[1] - target_value[1])
-                }
+        for angle_name, actual_range in self.actual_angles.items():
+            target_range = self.target_angles.get(angle_name, [None, None])
+            actual_min, actual_max = actual_range
+            target_min, target_max = target_range
+
+            # Check if the actual angles are within the target range
+            if target_min is not None and target_max is not None:
+                if actual_min < target_min:
+                    comparison[angle_name] = {
+                        "status": "out_of_range",
+                        "issue": "too low",
+                        "deviation": target_min - actual_min
+                    }
+                elif actual_max > target_max:
+                    comparison[angle_name] = {
+                        "status": "out_of_range",
+                        "issue": "too high",
+                        "deviation": actual_max - target_max
+                    }
+                else:
+                    comparison[angle_name] = {
+                        "status": "in_range"
+                    }
             else:
-                comparison[angle] = {
-                    "target": target_value,
-                    "actual": "Not set",
-                    "difference": "Not available"
+                comparison[angle_name] = {
+                    "status": "no_target_range"
                 }
+
         return comparison

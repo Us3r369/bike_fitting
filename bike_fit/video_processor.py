@@ -130,10 +130,11 @@ class VideoProcessor:
                 thigh_gradient = self._calculate_angle_two_points(keypoints['left_hip'], keypoints['left_knee'])
                 #summarize the angles
                 frame_angles = {"knee_angle": knee_angle, "elbow_angle": elbow_angle, "shoulder_angle": shoulder_angle, "hip_angle": hip_angle, "ankle_angle": ankle_angle, "back_gradient": back_gradient, "thigh_gradient": thigh_gradient} 
-                #IF angle of current frame smaller than first corresponding, or larger than second corresponding, append to actual_angles
+                #annotate the angles
+                self.annotate_angles(frame, keypoints, frame_angles)
+                #If angle of current frame smaller than first corresponding, or larger than second corresponding, append to actual_angles
                 for angle in frame_angles:
-                    logging.info(f"Comparing {angle} with {frame_angles[angle]}")
-                    bike_fit.update_actual_angle(angle, frame_angles[angle])
+                    bike_fit.update_actual_angles(angle, frame_angles[angle])
             # Write the annotated frame to the output video
             out.write(frame)
         

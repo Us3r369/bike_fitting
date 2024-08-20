@@ -68,6 +68,10 @@ if st.button("Start Analysis"):
 
     # Process the video and get the actual angles
     video_angles = video_processor.process_video()
+
+    # Convert the dictionary into a Pandas DataFrame
+    video_angles_df = pd.DataFrame.from_dict(video_angles.actual_angles, orient='index', columns=['Min Angle', 'Max Angle'])
+
     #save video angles to json file
     with open(f'{output_folder}/video_angles.json', 'w') as f:
         json.dump(video_angles.actual_angles, f)
@@ -78,6 +82,8 @@ if st.button("Start Analysis"):
     video_bytes = video_file.read()
     st.video(video_bytes)
     st.write("The actual angles measured during the bike fitting session are:")
-    st.write(video_angles.actual_angles)
-    # Compare the target angles with the actual angles
-    #comparison_results = bike_fit.compare_angles()
+    st.table(video_angles_df)
+    bike_fit.set_actual_angles(video_angles.actual_angles)
+    comparison = bike_fit.compare_angles()
+    st.write("The comparison between target and actual angles is:")
+    st.write(comparison)
