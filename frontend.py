@@ -81,9 +81,28 @@ if st.button("Start Analysis"):
     video_file = open("./files/output_files/output_video.mov", "rb")
     video_bytes = video_file.read()
     st.video(video_bytes)
-    st.write("The actual angles measured during the bike fitting session are:")
-    st.table(video_angles_df)
     bike_fit.set_actual_angles(video_angles.actual_angles)
     comparison = bike_fit.compare_angles()
-    st.write("The comparison between target and actual angles is:")
-    st.write(comparison)
+    # Convert the comparison results to a DataFrame
+    data = []
+
+    for angle_name, result in comparison.items():
+        status = result.get('status', 'N/A')
+        issues = ', '.join(result.get('issues', [])) if 'issues' in result else 'None'
+        min_deviation = result.get('deviation', {}).get('min_deviation', 'N/A')
+        max_deviation = result.get('deviation', {}).get('max_deviation', 'N/A')
+        
+        data.append({
+            'Angle': angle_name,
+            'Status': status,
+            'Issues': issues,
+            'Min Deviation': min_deviation,
+            'Max Deviation': max_deviation
+        })
+
+    comparison_df = pd.DataFrame(data)
+    #join video_angles_df and comparison_df on angle name
+    evaluation_df = pd.merge(video_angles_df, comparison_df, left_index=True, right_on='Angle')
+    evaluation_df.set_index('Angle', inplace=True)
+    st.write("The actual angle and evaluation of your position is:")
+    st.table(evaluation_df)

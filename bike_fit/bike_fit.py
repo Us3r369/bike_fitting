@@ -60,27 +60,28 @@ class Bike_Fit:
             actual_min, actual_max = actual_range
             target_min, target_max = target_range
 
-            # Check if the actual angles are within the target range
-            if target_min is not None and target_max is not None:
-                if actual_min < target_min:
-                    comparison[angle_name] = {
-                        "status": "out_of_range",
-                        "issue": "too low",
-                        "deviation": target_min - actual_min
-                    }
-                elif actual_max > target_max:
-                    comparison[angle_name] = {
-                        "status": "out_of_range",
-                        "issue": "too high",
-                        "deviation": actual_max - target_max
-                    }
-                else:
-                    comparison[angle_name] = {
-                        "status": "in_range"
-                    }
-            else:
-                comparison[angle_name] = {
-                    "status": "no_target_range"
-                }
+            # Initialize the result for this angle
+            comparison[angle_name] = {
+                "status": "in_range",
+                "issues": [],
+                "deviation": {}
+            }
+
+            # Check if the actual min angle is too low
+            if target_min is not None and actual_min < target_min:
+                comparison[angle_name]["status"] = "out_of_range"
+                comparison[angle_name]["issues"].append("too low")
+                comparison[angle_name]["deviation"]["min_deviation"] = target_min - actual_min
+
+            # Check if the actual max angle is too high
+            if target_max is not None and actual_max > target_max:
+                comparison[angle_name]["status"] = "out_of_range"
+                comparison[angle_name]["issues"].append("too high")
+                comparison[angle_name]["deviation"]["max_deviation"] = actual_max - target_max
+
+            # If there are no issues, remove unnecessary fields
+            if not comparison[angle_name]["issues"]:
+                comparison[angle_name].pop("issues")
+                comparison[angle_name].pop("deviation")
 
         return comparison
