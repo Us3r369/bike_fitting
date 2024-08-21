@@ -19,13 +19,19 @@ with open(f'{input_folder}target_ranges.json', 'r') as f:
 
 bike_fit = Bike_Fit(target_angles)
 
+st.set_page_config(layout="wide")
 st.title("Bike Fitting Application")
-uploaded_file = st.file_uploader("Upload your cycling video", type=["mp4", "mov", "avi"])
+#Expander for file upload
+with st.expander("Upload a video"):
+    uploaded_file = st.file_uploader("Upload your cycling video", type=["mp4", "mov", "avi"])
 
+if uploaded_file is None:
+    st.header("Explanation of Measurements")
+    st.image("./files/in_app_information/measurement_explanation.png", use_column_width=True)
 # Sidebar to define target ranges
 st.sidebar.header("Define Target Ranges (in degrees)")
 knee_angle_target = st.sidebar.slider(
-    "Knee Angle", min_value=0, max_value=180, value=(target_angles['knee_angle'][0], target_angles['knee_angle'][1]))
+    "Knee Angle", min_value=0, max_value=180, value=(target_angles['knee_angle'][0], target_angles['knee_angle'][1])) 
 elbow_angle_target = st.sidebar.slider(
     "Elbow Angle", min_value=0, max_value=180, value=(target_angles['elbow_angle'][0], target_angles['elbow_angle'][1]))
 shoulder_angle_target = st.sidebar.slider(
