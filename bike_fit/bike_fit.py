@@ -1,3 +1,5 @@
+import json
+
 class Bike_Fit:
     def __init__(self, target_angles=None):
         """
@@ -24,14 +26,6 @@ class Bike_Fit:
         :param angle_value: The value of the angle as a tuple (min, max).
         """
         self.target_angles[angle_name] = angle_value
-
-    def save_target_ranges(self, filepath):
-        """
-        Save the target angles to a JSON file.
-        :param filepath: The path to the JSON file where the target ranges should be saved.
-        """
-        with open(filepath, 'w') as f:
-            json.dump(self.target_angles, f)
 
     def update_actual_angles(self, angle_name, new_angle):
         """

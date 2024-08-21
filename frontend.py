@@ -50,8 +50,8 @@ bike_fit.set_target_angle("thigh_gradient", thigh_gradient_target)
 
 # Button to save the target ranges
 if st.sidebar.button("Save Target Ranges"):
-    bike_fit.save_target_angles(f'{input_folder}/target_ranges.json')
-    st.sidebar.success("Target ranges saved successfully!")
+    with open(f'{input_folder}target_ranges.json', 'w') as f:
+        json.dump(bike_fit.target_angles, f)
 
 # Step 3: Start Analysis Button
 if st.button("Start Analysis"):
